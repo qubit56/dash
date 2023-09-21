@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV to HTML Table</title>
+</head>
+<body>
+
+<div id="tableContainer"></div>
+
+<script>
+    function loadCSV(filePath, callback) {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200 || (xhr.status === 0 && xhr.responseText !== '')) {
+                    callback(xhr.responseText);
+                } else {
+                    console.error('Failed to load CSV file.');
+                }
+            }
+        };
+        xhr.open('GET', filePath, true);
+        xhr.send();
+    }
+    
+    function parseCSV(data) {
+        var lines = data.split("\n");
+        var result = [];
+        var headers = lines[0].split(",");
+    
+        for (var i = 1; i < lines.length; i++) {
+            var obj = {};
+            var currentLine = lines[i].split(",");
+    
+            for (var j = 0; j < headers.length; j++) {
+                obj[headers[j]] = currentLine[j];
+            }
+    
+            result.push(obj);
+        }
+    
+        return result;
+    }
+    
+    function generateTable(data) {
+        var table = "<table border='1'>";
+        var headers = Object.keys(data[0]);
+    
+        // 헤더 추가
+        table += "<thead><tr>";
+        headers.forEach(function(header) {
+            table += "<th>" + header + "</th>";
+        });
+        table += "</tr></thead>";
+    
+        // 데이터 추가
+        table += "<tbody>";
+        data.forEach(function(row) {
+            table += "<tr>";
+            headers.forEach(function(header) {
+                table += "<td>" + row[header] + "</td>";
+            });
+            table += "</tr>";
+        });
+        table += "</tbody>";
+    
+        table += "</table>";
+    
+        return table;
+    }
+    
+    loadCSV('sample.csv', function(data) {
+        var jsonData = parseCSV(data);
+        var tableHTML = generateTable(jsonData);
+        document.getElementById('tableContainer').innerHTML = tableHTML;
+    });
+    
+</script>
+
+</body>
+</html>
